@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Max Zischka — FPGA Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0B0F0D;
+    --bg-alt: #101512;
+    --panel: #131916;
+    --grid: #232C27;
+    --grid-soft: #1A211D;
+    --signal: #4FD1C5;
+    --signal-dim: #2E7C74;
+    --amber: #E0A458;
+    --text: #E9EDE9;
+    --text-muted: #8A968E;
+    --text-faint: #576059;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin:0; padding:0; }
+
+  html { scroll-behavior: smooth; }
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.6;
+    background-image:
+      linear-gradient(var(--grid-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-soft) 1px, transparent 1px);
+    background-size: 42px 42px;
+    background-position: -1px -1px;
+  }
+
+  a { color: inherit; }
+
+  ::selection { background: var(--signal-dim); color: var(--bg); }
+
+  /* ---------- top ticker ---------- */
+  .ticker{
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    background: rgba(11,15,13,0.88);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--grid);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+  .ticker-left{ display:flex; align-items:center; gap:10px; color: var(--text-muted); }
+  .ticker-dot{
+    width:7px; height:7px; border-radius:50%;
+    background: var(--signal);
+    box-shadow: 0 0 0 0 rgba(79,209,197,0.6);
+    animation: pulse-dot 2.4s ease-out infinite;
+  }
+  @keyframes pulse-dot{
+    0%{ box-shadow: 0 0 0 0 rgba(79,209,197,0.45);}
+    70%{ box-shadow: 0 0 0 6px rgba(79,209,197,0);}
+    100%{ box-shadow: 0 0 0 0 rgba(79,209,197,0);}
+  }
+  .ticker-nav{ display:flex; gap: 24px; }
+  .ticker-nav a{ color: var(--text-muted); text-decoration:none; transition: color .15s ease; }
+  .ticker-nav a:hover{ color: var(--signal); }
+
+  section{ padding: 96px 28px; max-width: 980px; margin: 0 auto; }
+
+  /* ---------- hero ---------- */
+  .hero{
+    padding-top: 72px;
+    padding-bottom: 64px;
+  }
+  .eyebrow{
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--signal);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .eyebrow::before{
+    content:"";
+    width: 22px; height: 1px;
+    background: var(--signal-dim);
+  }
+  h1{
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: clamp(2.4rem, 6vw, 4.6rem);
+    line-height: 1.04;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+  .hero-sub{
+    margin-top: 22px;
+    max-width: 560px;
+    color: var(--text-muted);
+    font-size: 17px;
+  }
+  .hero-sub strong{ color: var(--text); font-weight: 500; }
+
+  .waveform-wrap{
+    margin-top: 56px;
+    border-top: 1px solid var(--grid);
+    border-bottom: 1px solid var(--grid);
+    padding: 24px 0;
+  }
+  .waveform-wrap svg{ width: 100%; height: auto; display:block; }
+  .wf-path{
+    stroke-dasharray: 1400;
+    stroke-dashoffset: 1400;
+    animation: draw 2.1s cubic-bezier(.4,.1,.2,1) forwards;
+  }
+  .wf-path.delay{ animation-delay: .25s; }
+  @keyframes draw{ to{ stroke-dashoffset: 0; } }
+  .wf-pulse{
+    animation: travel 4.5s linear infinite;
+    animation-delay: 2.3s;
+    opacity: 0;
+  }
+  @keyframes travel{
+    0%{ transform: translateX(-4%); opacity: 0; }
+    5%{ opacity: 1; }
+    92%{ opacity: 1; }
+    100%{ transform: translateX(104%); opacity: 0; }
+  }
+  .wf-caption{
+    display:flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.04em;
+  }
+
+  .cta-row{ margin-top: 40px; display:flex; gap: 16px; flex-wrap: wrap; }
+  .btn{
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 12px 20px;
+    border: 1px solid var(--grid);
+    text-decoration: none;
+    letter-spacing: 0.03em;
+    transition: border-color .15s ease, color .15s ease, background .15s ease;
+    display:inline-flex;
+    align-items:center;
+    gap: 8px;
+  }
+  .btn-primary{ background: var(--signal); color: var(--bg); border-color: var(--signal); font-weight: 600;}
+  .btn-primary:hover{ background: transparent; color: var(--signal); }
+  .btn-ghost{ color: var(--text-muted); }
+  .btn-ghost:hover{ color: var(--signal); border-color: var(--signal-dim); }
+
+  /* ---------- section headers ---------- */
+  .sec-head{
+    display:flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .sec-addr{
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--signal-dim);
+  }
+  .sec-title{
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .sec-rule{
+    flex: 1;
+    height: 1px;
+    background: var(--grid);
+  }
+
+  /* ---------- about ---------- */
+  .about-grid{
+    display:grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 56px;
+  }
+  .about-grid p{ color: var(--text-muted); margin-bottom: 16px; font-size: 15.5px; }
+  .about-grid p strong{ color: var(--text); font-weight: 500; }
+
+  .field-list{ font-family: var(--mono); font-size: 13px; }
+  .field-row{
+    display:flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--grid-soft);
+    gap: 12px;
+  }
+  .field-key{ color: var(--text-faint); }
+  .field-val{ color: var(--text); text-align: right; }
+
+  @media (max-width: 720px){
+    .about-grid{ grid-template-columns: 1fr; }
+  }
+
+  /* ---------- projects (register map) ---------- */
+  .reg-table{ width: 100%; border-collapse: collapse; }
+  .reg-table thead th{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-align: left;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--grid);
+    font-weight: 500;
+  }
+  .reg-row td{
+    padding: 22px 0;
+    border-bottom: 1px solid var(--grid-soft);
+    vertical-align: top;
+  }
+  .reg-row:hover{ background: var(--panel); }
+  .reg-row td:first-child{ padding-left: 12px; }
+  .reg-row td:last-child{ padding-right: 12px; }
+  .reg-addr{
+    font-family: var(--mono);
+    color: var(--signal);
+    font-size: 13px;
+    white-space: nowrap;
+    width: 90px;
+  }
+  .reg-name{
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .reg-desc{ color: var(--text-muted); font-size: 14px; max-width: 480px; }
+  .reg-tags{
+    display:flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;
+  }
+  .tag{
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--text-faint);
+    border: 1px solid var(--grid);
+    padding: 3px 8px;
+    letter-spacing: 0.02em;
+  }
+  .reg-status{
+    font-family: var(--mono);
+    font-size: 11px;
+    white-space: nowrap;
+    text-align: right;
+    width: 90px;
+  }
+  .status-active{ color: var(--signal); }
+  .status-done{ color: var(--text-faint); }
+
+  @media (max-width: 680px){
+    .reg-table thead{ display:none; }
+    .reg-table, .reg-table tbody, .reg-row, .reg-row td{ display:block; width: 100%; }
+    .reg-addr, .reg-status{ width:auto; text-align:left; margin-bottom: 6px; }
+    .reg-row td{ padding: 6px 0; border-bottom:none; }
+    .reg-row{ border-bottom: 1px solid var(--grid-soft); padding-bottom: 18px; margin-bottom: 4px;}
+  }
+
+  /* ---------- toolchain ---------- */
+  .tool-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1px;
+    background: var(--grid);
+    border: 1px solid var(--grid);
+  }
+  .tool-cell{
+    background: var(--bg);
+    padding: 20px;
+  }
+  .tool-cat{
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--signal-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+  .tool-items{ color: var(--text-muted); font-size: 13.5px; }
+  .tool-items div{ padding: 2px 0; }
+
+  /* ---------- footer / contact ---------- */
+  footer{
+    padding: 80px 28px 60px;
+    max-width: 980px;
+    margin: 0 auto;
+    border-top: 1px solid var(--grid);
+  }
+  .contact-row{
+    display:flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .contact-title{
+    font-family: var(--mono);
+    font-size: 26px;
+    font-weight: 600;
+    max-width: 460px;
+  }
+  .contact-links{ display:flex; flex-direction: column; gap: 10px; font-family: var(--mono); font-size: 13px; }
+  .contact-links a{ text-decoration:none; color: var(--text-muted); transition: color .15s ease; }
+  .contact-links a:hover{ color: var(--signal); }
+  .foot-note{
+    margin-top: 60px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    display:flex;
+    justify-content: space-between;
+  }
+
+  @media (max-width: 720px){
+    .ticker-nav{ display:none; }
+    section{ padding: 64px 20px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .wf-path{ animation: none; stroke-dashoffset: 0; }
+    .wf-pulse{ animation: none; opacity: 0; }
+    .ticker-dot{ animation: none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="ticker">
+    <div class="ticker-left">
+      <span class="ticker-dot"></span>
+      <span>MTL &middot; CLK 12:00 &middot; STATUS LOCKED</span>
+    </div>
+    <nav class="ticker-nav">
+      <a href="#about">0x00 About</a>
+      <a href="#projects">0x01 Projects</a>
+      <a href="#toolchain">0x02 Toolchain</a>
+      <a href="#contact">0x03 Contact</a>
+    </nav>
+  </div>
+
+  <section class="hero">
+    <div class="eyebrow">Electrical Engineering &middot; McGill University</div>
+    <h1>Max Zischka</h1>
+    <p class="hero-sub">
+      FPGA and digital design engineer building <strong>verification-first RTL</strong> —
+      from a two-stage butterfly pipeline in SystemVerilog to a reverse-engineered
+      ASIC netlist recovered straight from GDS geometry. Targeting FPGA roles in
+      <strong>high-frequency trading</strong> and low-latency hardware.
+    </p>
+
+    <div class="waveform-wrap">
+      <svg viewBox="0 0 900 120" preserveAspectRatio="none">
+        <!-- clock trace -->
+        <path class="wf-path" d="M0,30 L60,30 L60,10 L140,10 L140,30 L220,30 L220,10 L300,10 L300,30 L380,30 L380,10 L460,10 L460,30 L540,30 L540,10 L620,10 L620,30 L700,30 L700,10 L780,10 L780,30 L860,30 L900,30"
+          fill="none" stroke="var(--grid)" stroke-width="2"/>
+        <!-- data / signal trace -->
+        <path class="wf-path delay" d="M0,85 L40,85 L40,60 L100,60 L100,95 L160,95 L160,50 L230,50 L230,85 L300,85 L300,65 L360,65 L360,100 L430,100 L430,55 L500,55 L500,80 L570,80 L570,60 L640,60 L640,90 L710,90 L710,55 L780,55 L780,80 L900,80"
+          fill="none" stroke="var(--signal)" stroke-width="2.5"/>
+        <circle class="wf-pulse" cx="0" cy="80" r="5" fill="var(--amber)"/>
+      </svg>
+      <div class="wf-caption">
+        <span>CH1 CLK 100MHz</span>
+        <span>CH2 DATA · Q1.15</span>
+        <span>t</span>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/MaxZischka1" target="_blank" rel="noopener">View GitHub &rarr;</a>
+      <a class="btn btn-ghost" href="#projects">See projects</a>
+      <a class="btn btn-ghost" href="#contact">Contact</a>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="sec-head">
+      <span class="sec-addr">0x00</span>
+      <span class="sec-title">About</span>
+      <span class="sec-rule"></span>
+    </div>
+    <div class="about-grid">
+      <div>
+        <p>
+          I'm a second-year <strong>Electrical Engineering</strong> student at McGill University,
+          minoring in Computer Science, working toward FPGA engineering roles with a long-term
+          target of low-latency trading hardware at firms like Jane Street, Citadel Securities,
+          and Jump Trading.
+        </p>
+        <p>
+          Most of my time goes into building things that are correct, not just things that work —
+          which means writing a <strong>transactional C++/Verilator testbench</strong> before I
+          trust a datapath, and treating a scoreboard mismatch as more interesting than a passing
+          simulation. I write RTL by hand, deliberately without AI coding assistants, because the
+          intuition for pipeline timing and bit-level arithmetic has to be earned.
+        </p>
+        <p>
+          Outside of FPGA work, I co-lead the radio sub-team on the <strong>McGill Rocket Team's</strong>
+          avionics group, building dual-band LoRa telemetry for our launch vehicles.
+        </p>
+      </div>
+      <div class="field-list">
+        <div class="field-row"><span class="field-key">LOCATION</span><span class="field-val">Montreal, QC</span></div>
+        <div class="field-row"><span class="field-key">PROGRAM</span><span class="field-val">B.Eng, Electrical Eng.</span></div>
+        <div class="field-row"><span class="field-key">MINOR</span><span class="field-val">Computer Science</span></div>
+        <div class="field-row"><span class="field-key">FOCUS</span><span class="field-val">FPGA / Digital Design</span></div>
+        <div class="field-row"><span class="field-key">TARGET</span><span class="field-val">HFT &amp; Low-Latency HW</span></div>
+        <div class="field-row"><span class="field-key">TEAM</span><span class="field-val">McGill Rocket Team, Avionics</span></div>
+        <div class="field-row"><span class="field-key">GITHUB</span><span class="field-val">MaxZischka1</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="sec-head">
+      <span class="sec-addr">0x01</span>
+      <span class="sec-title">Projects</span>
+      <span class="sec-rule"></span>
+    </div>
+
+    <table class="reg-table">
+      <thead>
+        <tr>
+          <th>Addr</th>
+          <th>Project</th>
+          <th style="text-align:right;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr class="reg-row">
+          <td class="reg-addr">0x10</td>
+          <td>
+            <div class="reg-name">R2SDF FFT Pipeline</div>
+            <div class="reg-desc">
+              Radix-2 single-path delay feedback FFT targeting the iCE40 UP5K, in Q1.15
+              fixed-point using SB_MAC16 DSP primitives. Includes a complex butterfly unit
+              with twiddle ROM addressing, even/odd BRAM banking via an XOR parity scheme,
+              and a custom driver/monitor/scoreboard testbench in C++/Verilator.
+            </div>
+            <div class="reg-tags">
+              <span class="tag">SystemVerilog</span>
+              <span class="tag">iCE40 UP5K</span>
+              <span class="tag">Verilator</span>
+              <span class="tag">Fixed-Point DSP</span>
+            </div>
+          </td>
+          <td class="reg-status status-active">IN PROGRESS</td>
+        </tr>
+
+        <tr class="reg-row">
+          <td class="reg-addr">0x11</td>
+          <td>
+            <div class="reg-name">Jane Street ASIC Reverse Engineering Challenge</div>
+            <div class="reg-desc">
+              Recovering a gate-level netlist directly from layout geometry. Built a Python
+              pipeline on KLayout's API and the sky130 PDK, moving from connectivity-based
+              net partitioning to per-flop backward fan-in cone decomposition as the
+              structurally correct approach.
+            </div>
+            <div class="reg-tags">
+              <span class="tag">KLayout</span>
+              <span class="tag">sky130</span>
+              <span class="tag">Python</span>
+              <span class="tag">Netlist Extraction</span>
+            </div>
+          </td>
+          <td class="reg-status status-active">DUE SEP 4</td>
+        </tr>
+
+        <tr class="reg-row">
+          <td class="reg-addr">0x12</td>
+          <td>
+            <div class="reg-name">Dual-Band LoRa Avionics Telemetry</div>
+            <div class="reg-desc">
+              Co-lead of the radio sub-team on McGill Rocket Team avionics. Dual-band
+              telemetry system pairing an SX1262 (900 MHz) and SX1268 (433 MHz) on a
+              Teensy 4.1, with the ASTRA protocol and embedded C++ driver stack.
+            </div>
+            <div class="reg-tags">
+              <span class="tag">SX1262 / SX1268</span>
+              <span class="tag">Teensy 4.1</span>
+              <span class="tag">Embedded C++</span>
+              <span class="tag">PCB Design</span>
+            </div>
+          </td>
+          <td class="reg-status status-active">ONGOING</td>
+        </tr>
+
+        <tr class="reg-row">
+          <td class="reg-addr">0x13</td>
+          <td>
+            <div class="reg-name">4-Bit Computer</div>
+            <div class="reg-desc">
+              A minimal 4-bit computer built from the gate level up, originally targeting
+              MAX10/Quartus and later ported to iCE40 through the open-source toolchain.
+            </div>
+            <div class="reg-tags">
+              <span class="tag">Verilog</span>
+              <span class="tag">MAX10 &rarr; iCE40</span>
+              <span class="tag">Yosys / nextpnr</span>
+            </div>
+          </td>
+          <td class="reg-status status-done">COMPLETE</td>
+        </tr>
+
+        <tr class="reg-row">
+          <td class="reg-addr">0x14</td>
+          <td>
+            <div class="reg-name">Advent of FPGA 2025 — Jane Street</div>
+            <div class="reg-desc">
+              Completed Jane Street's Advent of FPGA program using HardCaml in OCaml,
+              working through a season of daily hardware design puzzles.
+            </div>
+            <div class="reg-tags">
+              <span class="tag">HardCaml</span>
+              <span class="tag">OCaml</span>
+            </div>
+          </td>
+          <td class="reg-status status-done">COMPLETE</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </section>
+
+  <section id="toolchain">
+    <div class="sec-head">
+      <span class="sec-addr">0x02</span>
+      <span class="sec-title">Toolchain</span>
+      <span class="sec-rule"></span>
+    </div>
+    <div class="tool-grid">
+      <div class="tool-cell">
+        <div class="tool-cat">RTL &amp; Verification</div>
+        <div class="tool-items">
+          <div>SystemVerilog</div>
+          <div>Verilog</div>
+          <div>C++ / Verilator</div>
+          <div>UVM concepts</div>
+        </div>
+      </div>
+      <div class="tool-cell">
+        <div class="tool-cat">FPGA Toolchain</div>
+        <div class="tool-items">
+          <div>Yosys</div>
+          <div>nextpnr</div>
+          <div>GTKWave</div>
+          <div>Quartus</div>
+        </div>
+      </div>
+      <div class="tool-cell">
+        <div class="tool-cat">Silicon &amp; Layout</div>
+        <div class="tool-items">
+          <div>KLayout</div>
+          <div>sky130 PDK</div>
+          <div>Python</div>
+        </div>
+      </div>
+      <div class="tool-cell">
+        <div class="tool-cat">Embedded &amp; Hardware</div>
+        <div class="tool-items">
+          <div>Embedded C++</div>
+          <div>Teensy 4.1</div>
+          <div>PCB Design</div>
+          <div>LoRa / RF</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <div class="contact-row">
+      <div class="contact-title">Let's build something that has to be correct the first time.</div>
+      <div class="contact-links">
+        <a href="https://github.com/MaxZischka1" target="_blank" rel="noopener">github.com/MaxZischka1</a>
+        <a href="mailto:[email protected]">[email protected]</a>
+        <a href="#" target="_blank" rel="noopener">linkedin.com/in/[your-handle]</a>
+      </div>
+    </div>
+    <div class="foot-note">
+      <span>&copy; 2026 Max Zischka</span>
+      <span>Montreal, QC</span>
+    </div>
+  </footer>
+
+</body>
+</html>
