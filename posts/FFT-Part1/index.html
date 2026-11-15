@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Part 1 of GFSK demodulator (FFT and Audio Spectrum Analyzer) - Max Zischka</title><link rel="stylesheet" href="/style.css"></head>
+<body><main>
+<nav><a href="/">Home</a><a href="/writing" aria-current="page">Writing</a><a href="/projects">Projects</a><a href="/contact">Contact</a></nav>
+<h1>Part 1 of GFSK demodulator (FFT and Audio Spectrum Analyzer)</h1>
+<p class="date">2026-11-14 · <a href="https://github.com/MaxZischka1/FastFourierTransformProject">Code on GitHub</a></p>
+
+<p>A full write-up of this project is coming soon. For now, check out the <a href="https://github.com/MaxZischka1/FastFourierTransformProject">GitHub repo</a> and my <a href="https://x.com/MaxZischka1/status/2121126179226927585">post on X</a>, which show where the project stands right now.</p>
+
+<h2>Current state</h2>
+<p><img src="breadboard.jpg" width="700" alt="Breadboard with a MAX9814 mic amp, Sallen-Key low-pass filter, MCP3201 12-bit ADC, iCE40 UP5K FPGA, and 2N3904 common-cathode drivers"></p>
+
+<p><video src="freq1.mp4" width="700" controls playsinline preload="metadata" style="max-width:100%;height:auto"></video></p>
+<p>Working well when the tone is at the exact center of a bin.</p>
+<p><video src="freq2.mp4" width="700" controls playsinline preload="metadata" style="max-width:100%;height:auto"></video></p>
+<p>When the tone isn't at the exact center of a bin, the energy spreads into the neighboring bins.</p>
+</main></body></html>
